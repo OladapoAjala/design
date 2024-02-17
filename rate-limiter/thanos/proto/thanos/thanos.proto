@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/OladapoAjala/design/rate-limiter/thanos/proto/thanos";
+
+package thanos;
+
+service Checkouter {
+  rpc Checkout (CheckoutRequest) returns (CheckoutResponse) {}
+}
+
+message CheckoutRequest {
+  string cart_id = 1;
+}
+
+message CheckoutResponse {
+  double cost = 1;
+}

@@ -41,7 +41,10 @@
                     # Protobuf
                     protobuf
                     protoc-gen-go
-                    grpc
+                    protoc-gen-go-grpc
+
+                    # GRPC
+                    grpcurl
                   ];
                 }
               ];
