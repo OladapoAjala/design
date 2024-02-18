@@ -46,6 +46,19 @@
                     # GRPC
                     grpcurl
                   ];
+
+                  scripts = {
+                    thanos-grpc.exec = ''
+                      cd thanos/proto/thanos &&
+                      protoc --go_out=. --go_opt=paths=source_relative \                                                                                                                                                           INT ✘  ▼  impure  
+                        --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+                        thanos/thanos.proto
+                    '';
+                  };
+
+                  processes = {
+                    minikube.exec = "minikube start --cpus=max";
+                  };
                 }
               ];
             };
