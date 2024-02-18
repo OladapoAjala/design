@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.21.12
-// source: thanos/thanos.proto
+// source: thanos.proto
 
 package thanos
 
@@ -105,5 +105,5 @@ var Checkouter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "thanos/thanos.proto",
+	Metadata: "thanos.proto",
 }

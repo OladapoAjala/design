@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: rate-limiter
+build:
+  artifacts:
+    - image: thanos
+      ko:
+        main: ./thanos/cmd/thanos
+manifests:
+  rawYaml:
+    - deploy/redis/config-map.yml
+    - deploy/redis/deployment.yml
+    - deploy/redis/service.yml
+    - deploy/thanos/deployment.yml
+    - deploy/thanos/service.yml
