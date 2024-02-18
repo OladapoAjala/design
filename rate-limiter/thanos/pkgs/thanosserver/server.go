@@ -5,10 +5,12 @@ import (
 	"fmt"
 
 	"github.com/OladapoAjala/design/rate-limiter/thanos/proto/thanos"
+	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
 	thanos.UnimplementedCheckouterServer
+	Cache *redis.Client
 }
 
 var _ thanos.CheckouterServer = new(Server)
