@@ -45,19 +45,39 @@
 
                     # GRPC
                     grpcurl
+
+                    # Kubernetes
+                    skaffold
+                    kpt
+                    kubernetes-helm
                   ];
 
                   scripts = {
                     thanos-grpc.exec = ''
                       cd thanos/proto/thanos &&
-                      protoc --go_out=. --go_opt=paths=source_relative \                                                                                                                                                           INT ✘  ▼  impure  
-                        --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-                        thanos/thanos.proto
+                      protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative thanos.proto
                     '';
                   };
 
+                  process.before = ''
+                    if ! minikube status > /dev/null 2>&1; then
+                      echo 'Minikube is not running. Starting Minikube...'
+                      minikube start --cpus=max
+                    else
+                      echo 'Minikube is already running.'
+                    fi
+
+                    if ! kubectl get namespace design > /dev/null 2>&1; then
+                      echo "Namespace design does not exist. Creating it..."
+                      kubectl create namespace design 
+                    else
+                      echo "Namespace design already exists."
+                    fi
+                  '';
+
                   processes = {
-                    minikube.exec = "minikube start --cpus=max";
+                    skaffold.exec = "cd rate-limiter; skaffold  --force-colors dev";
+                    tunnel.exec = "minikube tunnel";
                   };
                 }
               ];

@@ -12,15 +12,15 @@ import (
 
 func main() {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
+		Addr:     "redis-master:6379",
+		Password: "Z2z1WRfBhi",
 		DB:       0,
 	})
 	server := &thanosserver.Server{
 		Cache: rdb,
 	}
 
-	lis, err := net.Listen("tcp", ":8088")
+	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

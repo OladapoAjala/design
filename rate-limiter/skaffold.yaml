@@ -9,8 +9,16 @@ build:
         main: ./thanos/cmd/thanos
 manifests:
   rawYaml:
-    - deploy/redis/config-map.yml
-    - deploy/redis/deployment.yml
-    - deploy/redis/service.yml
+
+    # Thanos
     - deploy/thanos/deployment.yml
     - deploy/thanos/service.yml
+
+deploy:
+  helm:
+    releases:
+      - name: redis
+        repo: https://charts.bitnami.com/bitnami 
+        remoteChart: redis
+        valuesFiles:
+          - deploy/redis/values.yml

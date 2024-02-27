@@ -1,0 +1,4 @@
+master:
+  password: "redis"
+persistence:
+  enabled: true
