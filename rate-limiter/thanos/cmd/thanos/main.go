@@ -13,7 +13,7 @@ import (
 func main() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "redis-master:6379",
-		Password: "Z2z1WRfBhi",
+		Password: "7dluNxgMY1",
 		DB:       0,
 	})
 	server := &thanosserver.Server{
