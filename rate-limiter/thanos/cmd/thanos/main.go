@@ -6,18 +6,13 @@ import (
 
 	"github.com/OladapoAjala/design/rate-limiter/thanos/pkgs/thanosserver"
 	"github.com/OladapoAjala/design/rate-limiter/thanos/proto/thanos"
-	"github.com/redis/go-redis/v9"
+	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "redis-master:6379",
-		Password: "7dluNxgMY1",
-		DB:       0,
-	})
 	server := &thanosserver.Server{
-		Cache: rdb,
+		Cache: memcache.New("cache-mcrouter:5000"),
 	}
 
 	lis, err := net.Listen("tcp", ":8080")

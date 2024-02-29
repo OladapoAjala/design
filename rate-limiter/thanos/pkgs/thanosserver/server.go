@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/OladapoAjala/design/rate-limiter/thanos/proto/thanos"
-	"github.com/redis/go-redis/v9"
+	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc/peer"
 )
 
 type Server struct {
 	thanos.UnimplementedCheckouterServer
-	Cache *redis.Client
+	Cache *memcache.Client
 }
 
 var _ thanos.CheckouterServer = new(Server)
@@ -26,24 +25,26 @@ func (s *Server) Checkout(ctx context.Context, req *thanos.CheckoutRequest) (*th
 	}
 	log.Printf("peer: %v\n", peer)
 
-	oldVal, err := s.Cache.Get(ctx, peer.LocalAddr.String()).Result()
-	if err == redis.Nil || oldVal == "" {
-		err := s.Cache.Set(ctx, peer.LocalAddr.String(), 1, 10*time.Second).Err()
+	_, err := s.Cache.Get(peer.LocalAddr.String())
+	if err != nil {
+		err := s.Cache.Set(&memcache.Item{
+			Key:        peer.LocalAddr.String(),
+			Value:      []byte(strconv.Itoa(1)),
+			Expiration: 10, // time in seconds
+		})
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
-	} else if err != nil {
-		return nil, fmt.Errorf("unknown error %w", err)
 	}
 
-	val, err := s.Cache.Get(ctx, peer.LocalAddr.String()).Result()
-	if err == redis.Nil || oldVal == "" {
+	item, err := s.Cache.Get(peer.LocalAddr.String())
+	if err != nil {
 		return nil, err
 	}
-	log.Printf("current value: %v", val)
+	log.Printf("current value: %s", item.Value)
 
-	count, err := strconv.Atoi(val)
+	count, err := strconv.Atoi(string(item.Value))
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,11 @@ func (s *Server) Checkout(ctx context.Context, req *thanos.CheckoutRequest) (*th
 		return nil, fmt.Errorf("rate limit exceeded")
 	}
 
-	err = s.Cache.Set(ctx, peer.LocalAddr.String(), count+1, 10*time.Second).Err()
+	err = s.Cache.Set(&memcache.Item{
+		Key:        peer.LocalAddr.String(),
+		Value:      []byte(strconv.Itoa(count + 1)),
+		Expiration: 10, // time in seconds
+	})
 	if err != nil {
 		return nil, err
 	}
