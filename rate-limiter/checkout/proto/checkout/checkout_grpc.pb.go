@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.21.12
-// source: thanos.proto
+// source: checkout.proto
 
-package thanos
+package checkout
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Checkouter_Checkout_FullMethodName = "/thanos.Checkouter/Checkout"
+	Checkouter_Checkout_FullMethodName = "/checkout.Checkouter/Checkout"
 )
 
 // CheckouterClient is the client API for Checkouter service.
@@ -96,7 +96,7 @@ func _Checkouter_Checkout_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Checkouter_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "thanos.Checkouter",
+	ServiceName: "checkout.Checkouter",
 	HandlerType: (*CheckouterServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -105,5 +105,5 @@ var Checkouter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "thanos.proto",
+	Metadata: "checkout.proto",
 }

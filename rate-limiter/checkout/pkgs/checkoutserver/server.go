@@ -1,4 +1,4 @@
-package thanosserver
+package checkoutserver
 
 import (
 	"context"
@@ -6,19 +6,19 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/OladapoAjala/design/rate-limiter/thanos/proto/thanos"
+	"github.com/OladapoAjala/design/rate-limiter/checkout/proto/checkout"
 	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc/peer"
 )
 
 type Server struct {
-	thanos.UnimplementedCheckouterServer
+	checkout.UnimplementedCheckouterServer
 	Cache *memcache.Client
 }
 
-var _ thanos.CheckouterServer = new(Server)
+var _ checkout.CheckouterServer = new(Server)
 
-func (s *Server) Checkout(ctx context.Context, req *thanos.CheckoutRequest) (*thanos.CheckoutResponse, error) {
+func (s *Server) Checkout(ctx context.Context, req *checkout.CheckoutRequest) (*checkout.CheckoutResponse, error) {
 	peer, ok := peer.FromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("unable to extract client info")
@@ -62,7 +62,7 @@ func (s *Server) Checkout(ctx context.Context, req *thanos.CheckoutRequest) (*th
 		return nil, err
 	}
 
-	return &thanos.CheckoutResponse{
+	return &checkout.CheckoutResponse{
 		Cost: 10,
 	}, nil
 }

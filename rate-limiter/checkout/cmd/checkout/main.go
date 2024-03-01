@@ -4,14 +4,14 @@ import (
 	"log"
 	"net"
 
-	"github.com/OladapoAjala/design/rate-limiter/thanos/pkgs/thanosserver"
-	"github.com/OladapoAjala/design/rate-limiter/thanos/proto/thanos"
+	"github.com/OladapoAjala/design/rate-limiter/checkout/pkgs/checkoutserver"
+	"github.com/OladapoAjala/design/rate-limiter/checkout/proto/checkout"
 	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	server := &thanosserver.Server{
+	server := &checkoutserver.Server{
 		Cache: memcache.New("cache-mcrouter:5000"),
 	}
 
@@ -21,7 +21,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	thanos.RegisterCheckouterServer(grpcServer, server)
+	checkout.RegisterCheckouterServer(grpcServer, server)
 
 	log.Printf("server listening at %v", lis.Addr())
 	if err := grpcServer.Serve(lis); err != nil {
