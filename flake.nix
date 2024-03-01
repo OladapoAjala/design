@@ -30,6 +30,11 @@
                 enable = true;
                 version = "1.21.5";
               };
+
+              rust = {
+                enable = true;
+                channel = "stable";
+              };
             };
 
 
