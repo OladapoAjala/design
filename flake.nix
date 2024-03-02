@@ -55,6 +55,10 @@
                     skaffold
                     kpt
                     kubernetes-helm
+
+                    # OpenSSL
+                    pkg-config
+                    openssl
                   ];
 
                   scripts = {
