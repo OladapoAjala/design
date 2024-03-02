@@ -12,4 +12,4 @@ COPY thanos/Cargo.toml Cargo.toml
 COPY thanos/src src
 
 RUN cargo build --locked --release
-CMD ["/target/release/thanos"]
+CMD ["/thanos/target/release/thanos"]

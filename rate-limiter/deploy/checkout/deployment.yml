@@ -17,10 +17,8 @@ spec:
       containers:
       - name: checkout
         image: checkout
+      - name: thanos
+        image: thanos
         ports:
         - containerPort: 8080
           name: checkout
-      initContainers:
-        - name: thanos
-          image: thanos
-          restartPolicy: Always

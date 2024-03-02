@@ -16,15 +16,12 @@ manifests:
     - deploy/checkout/deployment.yml
     - deploy/checkout/service.yml
 
-    # Thanos
-    - deploy/thanos/deployment.yml
-    - deploy/thanos/service.yml
-
-deploy:
-  helm:
-    releases:
-      - name: redis
-        repo: https://charts.bitnami.com/bitnami 
-        remoteChart: redis
-        valuesFiles:
-          - deploy/redis/values.yml
+# deploy memcache instead
+# deploy:
+#   helm:
+#     releases:
+#       - name: redis
+#         repo: https://charts.bitnami.com/bitnami 
+#         remoteChart: redis
+#         valuesFiles:
+#           - deploy/redis/values.yml
