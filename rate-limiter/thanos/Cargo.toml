@@ -12,3 +12,4 @@ tokio = { version = "1.36.0", features = ["full"] }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["full"] }
 anyhow = "1.0.80"
+memcache = "0.17.2"
