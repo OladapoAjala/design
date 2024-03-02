@@ -1,0 +1,5 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "rate-limiter/thanos/Cargo.toml"
+  ]
+}
