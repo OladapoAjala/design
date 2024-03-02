@@ -1,53 +1,37 @@
-use std::net::SocketAddr;
-
-use anyhow::*;
-
-use http_body_util::{Empty, Full};
-use hyper::body::Bytes;
-use hyper::server::conn::http1;
-use hyper::service::service_fn;
-use hyper::{Request, Response};
-use hyper_util::rt::TokioIo;
-use tokio::net::TcpListener;
-
-// use hyper_util::client::legacy::Client;
-// use hyper_util::rt::{TokioExecutor, TokioIo};
+use std::error::Error;
+use tokio::io::{self, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let https = hyper_rustls::HttpsConnectorBuilder::new()
-        .with_native_roots()
-        .expect("no native root CA certificates found")
-        .https_only()
-        .enable_http1()
-        .build();
-    // let client: Client<_, Empty<Bytes>> = Client::builder(TokioExecutor::new()).build(https);
-    // let url = ("https://httpbin.org/json")
-    //     .parse()
-    //     .context("Parsing URL")?;
-    // let res = client.get(url).await.context("Performing HTTPS request");
-    // println!("{:?}", res);
+async fn main() -> Result<(), Box<dyn Error>> {
+    let listener = TcpListener::bind("0.0.0.0:3000").await?;
+    println!("Proxy listening on 0.0.0.0:3000");
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    let listener = TcpListener::bind(addr).await?;
-
-    println!("Listening on http://{}", addr);
     loop {
-        let (stream, _) = listener.accept().await?;
-        let io = TokioIo::new(stream);
+        let (client_stream, client_addr) = listener.accept().await?;
+        println!("Client connected: {}", client_addr);
 
-        tokio::task::spawn(async move {
-            if let Err(err) = http1::Builder::new()
-                .serve_connection(io, service_fn(hello))
-                .await
-            {
-                println!("Error serving connection: {:?}", err);
+        tokio::spawn(async move {
+            if let Err(e) = handle_connection(client_stream).await {
+                eprintln!("Error handling connection: {}", e);
             }
         });
     }
 }
 
-async fn hello(_: Request<hyper::body::Incoming>) -> Result<Response<Full<Bytes>>, anyhow::Error> {
-    println!("some called me");
-    Ok(Response::new(Full::new(Bytes::from("Hello, World dapo!"))))
+async fn handle_connection(mut client_stream: TcpStream) -> Result<(), Box<dyn Error>> {
+    let mut server_stream = TcpStream::connect("localhost:8080").await?;
+    println!("Connected to the gRPC server");
+
+    let (client_to_server, server_to_client) =
+        io::copy_bidirectional(&mut client_stream, &mut server_stream).await?;
+
+    println!(
+        "Forwarded {} bytes from client to server and {} bytes from server to client",
+        client_to_server, server_to_client
+    );
+
+    client_stream.shutdown().await?;
+    server_stream.shutdown().await?;
+    Ok(())
 }
