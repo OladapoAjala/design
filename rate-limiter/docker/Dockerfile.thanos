@@ -1,0 +1,15 @@
+ARG APP_NAME=thanos
+
+FROM rust AS build
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates gcc libssl-dev
+
+ARG APP_NAME
+WORKDIR /${APP_NAME}
+
+COPY thanos/Cargo.lock Cargo.lock
+COPY thanos/Cargo.toml Cargo.toml
+COPY thanos/src src
+
+RUN cargo build --locked --release
+CMD ["/target/release/thanos"]

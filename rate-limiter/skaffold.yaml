@@ -7,6 +7,9 @@ build:
     - image: checkout 
       ko:
         main: ./checkout/cmd/checkout
+    - image: thanos
+      docker:
+        dockerfile: docker/Dockerfile.thanos
 manifests:
   rawYaml:
     #Checkout 

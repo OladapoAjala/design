@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: thanos
+  name: checkout
 spec:
   selector:
-    app: thanos
+    app: checkout
   ports:
     - protocol: TCP
       port: 8080
-      targetPort: thanos
+      targetPort: checkout
   type: LoadBalancer
