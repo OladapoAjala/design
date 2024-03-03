@@ -5,17 +5,21 @@ use tokio::net::{TcpListener, TcpStream};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let listener = TcpListener::bind("0.0.0.0:3000").await?;
-    println!("Proxy listening on 0.0.0.0:3000");
+    let listener = TcpListener::bind("0.0.0.0:8081").await?;
+    println!("Proxy listening on 0.0.0.0:8081");
 
-    let memcached = Client::connect("memcache://cache-mcrouter:5000")?;
+    let memcached =
+        memcache::connect("memcache://cache-memcached:11211?timeout=10&tcp_nodelay=true")
+            .map_err(|e| Box::new(e) as Box<dyn Error>)?;
+    memcached
+        .flush()
+        .map_err(|e| Box::new(e) as Box<dyn Error>)?;
 
     loop {
         let (client_stream, client_addr) = listener.accept().await?;
+        println!("Client connected: {}", client_addr);
 
         if check_rate_limit(&memcached, &client_addr.ip().to_string()).await? {
-            println!("Client connected: {}", client_addr);
-
             tokio::spawn(async move {
                 if let Err(e) = handle_connection(client_stream, client_addr).await {
                     eprintln!("Error handling connection: {}", e);
@@ -29,17 +33,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 async fn check_rate_limit(memcached: &Client, ip: &str) -> Result<bool, Box<dyn Error>> {
     let key = format!("rate_limit:{}", ip);
-    let count: u32 = memcached
-        .get(&key)
-        .unwrap_or(Some(0))
-        .expect("request count");
+    let mut count: u32 = match memcached.get(&key)? {
+        Some(value) => value,
+        None => 0,
+    };
     println!("Current count: {}", count);
 
     if count >= 10 {
         return Ok(false);
     }
 
-    memcached.set(&key, count + 1, 10)?;
+    count += 1;
+    memcached.set(&key, count, 10)?;
     Ok(true)
 }
 
@@ -49,7 +54,7 @@ async fn handle_connection(
 ) -> Result<(), Box<dyn Error>> {
     println!("Handling request from client: {}", client_addr);
 
-    let mut server_stream = TcpStream::connect("localhost:8080").await?;
+    let mut server_stream = TcpStream::connect("127.0.0.1:3000").await?;
     println!("Connected to the gRPC server");
 
     let (client_to_server, server_to_client) =

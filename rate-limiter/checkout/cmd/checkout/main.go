@@ -15,7 +15,7 @@ func main() {
 		Cache: memcache.New("cache-mcrouter:5000"),
 	}
 
-	lis, err := net.Listen("tcp", ":8080")
+	lis, err := net.Listen("tcp", "127.0.0.1:3000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

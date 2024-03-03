@@ -20,5 +20,5 @@ spec:
       - name: thanos
         image: thanos
         ports:
-        - containerPort: 8080
-          name: checkout
+        - containerPort: 8081
+          name: thanos
