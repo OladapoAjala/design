@@ -6,14 +6,11 @@ import (
 
 	"github.com/OladapoAjala/design/rate-limiter/checkout/pkgs/checkoutserver"
 	"github.com/OladapoAjala/design/rate-limiter/checkout/proto/checkout"
-	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	server := &checkoutserver.Server{
-		Cache: memcache.New("cache-mcrouter:5000"),
-	}
+	server := new(checkoutserver.Server)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:3000")
 	if err != nil {
