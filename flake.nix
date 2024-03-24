@@ -59,6 +59,9 @@
                     # OpenSSL
                     pkg-config
                     openssl
+
+                    # Rust
+                    rust-analyzer
                   ];
 
                   scripts = {
