@@ -46,13 +46,6 @@
                     skaffold
                     kpt
                     kubernetes-helm
-
-                    # OpenSSL
-                    pkg-config
-                    openssl
-
-                    # Rust
-                    rust-analyzer
                   ];
 
                   scripts = {
