@@ -12,16 +12,10 @@ build:
         dockerfile: docker/Dockerfile.thanos
 manifests:
   rawYaml:
-    #Checkout 
+    # Checkout 
     - deploy/checkout/deployment.yml
     - deploy/checkout/service.yml
 
-# deploy memcache instead
-# deploy:
-#   helm:
-#     releases:
-#       - name: redis
-#         repo: https://charts.bitnami.com/bitnami 
-#         remoteChart: redis
-#         valuesFiles:
-#           - deploy/redis/values.yml
+    # Redis
+    - deploy/redis/configmap.yml
+    - deploy/redis/statefulset.yml

@@ -69,6 +69,8 @@
                     else
                       echo "Namespace design already exists."
                     fi
+
+                    kubectl config set-context --current-namespace design
                   '';
 
                   processes = {
