@@ -1,49 +1,92 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis 
+  name: redis
 spec:
-  serviceName: redis 
-  replicas: 3
+  serviceName: "redis-cluster"
+  replicas: 6
   selector:
     matchLabels:
-      app: redis 
+      app: redis
   template:
     metadata:
       labels:
-        app: redis 
+        app: redis
+        appCluster: redis-cluster
     spec:
+      terminationGracePeriodSeconds: 20
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+              topologyKey: kubernetes.io/hostname
       containers:
       - name: redis
-        image: redis:6.2.5
+        image: "redis:6.2"
+        command:
+          - "redis-server"
+        args:
+          - "/conf/redis.conf"
+          - "--protected-mode"
+          - "no"
         resources:
           requests:
-            cpu: '0.5'
-            memory: '1Gi'
-          limits:
-            cpu: '1'
-            memory: '2Gi'
-        command: ["redis-server"]
-        args: ["/conf/redis.conf"]
-        env:
-        - name: REDIS_CLUSTER_ANNOUNCE_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
+            cpu: "100m"
+            memory: "100Mi"
         ports:
-        - containerPort: 6379
-          name: client
-        - containerPort: 16379
-          name: gossip
+            - name: redis
+              containerPort: 6379
+              protocol: "TCP"
+            - name: cluster
+              containerPort: 16379
+              protocol: "TCP"
+        startupProbe:
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 20
+          tcpSocket:
+            port: redis
+        livenessProbe:
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+          exec:
+            command: ["sh", "-c", "/probes/liveness.sh"]
+        readinessProbe:
+          periodSeconds: 5
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 5
+          exec:
+            command: ["sh", "-c", "/probes/readiness.sh"]
         volumeMounts:
-        - name: config
+        - name: conf
           mountPath: /conf
+          readOnly: false
         - name: data
           mountPath: /data
+          readOnly: false
+        - name: probes
+          mountPath: /probes
+          readOnly: true
       volumes:
-      - name: config
+      - name: conf
         configMap:
-          name: redis-config
+          name: redis-cluster
+          defaultMode: 0755
+      - name: probes
+        configMap:
+          name: redis-probes
+          defaultMode: 0555
   volumeClaimTemplates:
   - metadata:
       name: data

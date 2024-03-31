@@ -12,10 +12,12 @@ build:
         dockerfile: docker/Dockerfile.thanos
 manifests:
   rawYaml:
+    # Redis
+    - deploy/redis/configmap.yml
+    - deploy/redis/service.yml
+    - deploy/redis/statefulset.yml
+    - deploy/redis/pdb.yml
+
     # Checkout 
     - deploy/checkout/deployment.yml
     - deploy/checkout/service.yml
-
-    # Redis
-    - deploy/redis/configmap.yml
-    - deploy/redis/statefulset.yml

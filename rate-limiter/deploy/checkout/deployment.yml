@@ -17,8 +17,3 @@ spec:
       containers:
       - name: checkout
         image: checkout
-      - name: thanos
-        image: thanos
-        ports:
-        - containerPort: 8081
-          name: thanos

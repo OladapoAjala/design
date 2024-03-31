@@ -46,6 +46,10 @@
                     skaffold
                     kpt
                     kubernetes-helm
+
+                    # Rust
+                    pkg-config
+                    openssl
                   ];
 
                   scripts = {
@@ -58,7 +62,7 @@
                   process.before = ''
                     if ! minikube status > /dev/null 2>&1; then
                       echo 'Minikube is not running. Starting Minikube...'
-                      minikube start --cpus=max
+                      minikube start --cpus=max -p design
                     else
                       echo 'Minikube is already running.'
                     fi
