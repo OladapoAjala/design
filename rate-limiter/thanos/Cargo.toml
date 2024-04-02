@@ -13,4 +13,4 @@ http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["full"] }
 anyhow = "1.0.80"
 memcache = "0.17.2"
-redis = "0.25.2"
+redis = { version = "0.25.2", features = [ "cluster"] }
