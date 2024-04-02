@@ -18,6 +18,10 @@ manifests:
     - deploy/redis/statefulset.yml
     - deploy/redis/pdb.yml
 
+    # Thanos 
+    - deploy/thanos/deployment.yml
+    - deploy/thanos/service.yml
+
     # Checkout 
     - deploy/checkout/deployment.yml
     - deploy/checkout/service.yml

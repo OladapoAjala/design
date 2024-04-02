@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanos
+  labels:
+    app: thanos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thanos
+  template:
+    metadata:
+      labels:
+        app: thanos
+    spec:
+      containers:
+      - name: thanos
+        image: thanos
