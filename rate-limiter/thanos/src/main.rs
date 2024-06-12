@@ -1,50 +1,69 @@
-use memcache::Client;
+use redis::cluster::{ClusterClient, ClusterConnection};
+use redis::{self, Commands};
 use std::error::Error;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::io::{self, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let nodes = vec![
+        "redis://redis-0:6379",
+        "redis://redis-1:6379",
+        "redis://redis-2:6379",
+    ];
+
+    let client = ClusterClient::new(nodes.clone())?;
+    let mut rediscon = client.get_connection()?;
+
+    // let ip_address = "192.168.1.1";
+    // let now =
+    // rediscon.zadd(ip_address, "now", "now")?;
+
+    // let val: i32 = con.get("test")?;
+    // println!("key1: {}", val);
+    // con.set("test", val + 1)?;
+    // time::sleep(Duration::from_secs(1)).await;
+    // }
+
     let listener = TcpListener::bind("0.0.0.0:8081").await?;
     println!("Proxy listening on 0.0.0.0:8081");
-
-    let memcached =
-        memcache::connect("memcache://cache-memcached:11211?timeout=10&tcp_nodelay=true")
-            .map_err(|e| Box::new(e) as Box<dyn Error>)?;
-    memcached
-        .flush()
-        .map_err(|e| Box::new(e) as Box<dyn Error>)?;
-
     loop {
         let (client_stream, client_addr) = listener.accept().await?;
         println!("Client connected: {}", client_addr);
 
-        if check_rate_limit(&memcached, &client_addr.ip().to_string()).await? {
-            tokio::spawn(async move {
-                if let Err(e) = handle_connection(client_stream, client_addr).await {
-                    eprintln!("Error handling connection: {}", e);
-                }
-            });
-        } else {
-            println!("Rate limit exceeded for: {}", client_addr);
+        match check_rate_limit(&mut rediscon, &client_addr.ip().to_string()).await {
+            Ok(_val) => {
+                tokio::spawn(async move {
+                    if let Err(e) = handle_connection(client_stream, client_addr).await {
+                        eprintln!("Error handling connection: {}", e);
+                    }
+                });
+            }
+            Err(e) => {
+                println!("Error: {}, client: {}", e, client_addr);
+            }
         }
     }
 }
 
-async fn check_rate_limit(memcached: &Client, ip: &str) -> Result<bool, Box<dyn Error>> {
+async fn check_rate_limit(redis: &mut ClusterConnection, ip: &str) -> Result<bool, Box<dyn Error>> {
     let key = format!("rate_limit:{}", ip);
-    let mut count: u32 = match memcached.get(&key)? {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs() as isize;
+    let count: u32 = match redis.zcount(ip, now, now.saturating_sub(10))? {
         Some(value) => value,
         None => 0,
     };
     println!("Current count: {}", count);
 
     if count >= 10 {
-        return Ok(false);
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Rate limit exceeded",
+        )) as Box<dyn Error>);
     }
 
-    count += 1;
-    memcached.set(&key, count, 10)?;
+    redis.zadd(&key, &key, now)?;
     Ok(true)
 }
 
@@ -54,7 +73,7 @@ async fn handle_connection(
 ) -> Result<(), Box<dyn Error>> {
     println!("Handling request from client: {}", client_addr);
 
-    let mut server_stream = TcpStream::connect("127.0.0.1:3000").await?;
+    let mut server_stream = TcpStream::connect("http://checkout").await?;
     println!("Connected to the gRPC server");
 
     let (client_to_server, server_to_client) =

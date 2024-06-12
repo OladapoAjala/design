@@ -17,3 +17,7 @@ spec:
       containers:
       - name: checkout
         image: checkout
+        ports:
+        - name: checkout
+          containerPort: 3000
+          protocol: TCP

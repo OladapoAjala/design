@@ -12,7 +12,7 @@ import (
 func main() {
 	server := new(checkoutserver.Server)
 
-	lis, err := net.Listen("tcp", "127.0.0.1:3000")
+	lis, err := net.Listen("tcp", "0.0.0.0:3000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

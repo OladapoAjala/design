@@ -17,3 +17,7 @@ spec:
       containers:
       - name: thanos
         image: thanos
+        ports:
+        - name: thanos
+          containerPort: 8081
+          protocol: TCP
